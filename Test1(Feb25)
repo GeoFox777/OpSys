@@ -1,0 +1,88 @@
+not including 10
+  finish assignments
+
+writing code
+  see fork bomb
+  Context switch
+    asm moving of registers
+
+Basic CPU Scheduling
+================================================================================
+Turnaround Time: ~The time at which the job completes minus the arrival time
+                 ~Essentially total time of process plus total time of next n processes, divided by n
+Response Time: ~Time from when a job arrives at the system to the first time it is scheduled
+               ~How long it takes a process to start after it arrives
+
+FIFO: ~First In first Out
+       Jobs come run and complete than switch to the next linearly
+SJF: ~Shortest Job First
+      Runs shortest job, then next shortest, etc
+RR: ~Round Robin
+     Runs process for a time slice, then switches to another process
+    ~A time slice is a slice of time to run a process
+     Time slices must be multiples of the interrupt period
+
+Multi Level Feedback Queue
+================================================================================
+MLFQ: ~1.If Priority(A) > Priority(B), A runs (B doesn't)
+       2.If Priority(A) - Priority(B), A & B run in round robin
+       3.When a job enters the system, it is placed at highest priority
+       4a.If a job uses up an entire time slice while running, its priority is reduced
+       4b.If a job give up the CPU before the time slice is up, it stays at the same
+          priority level
+      ~Priority varies based on observed behavior
+       A job that relinquishes the CPU waiting for input it get HIGH priority
+        because this is how an interactive process might behave
+       A job that use CPU intensively for long periods of time gets reduced priority
+      ~MLFQ learns about process and uses the history to guess the future
+      ~Jobs are assumed to be short and given less priority as they continue
+      ~Starvation - If there are 'too many ' interactive jobs in the system, they
+                    will combine to consume ALL CPU time
+                    Long-running jobs will never receive any CPU time (they starve)
+       Game the Scheduler - Programs can be written to trick the CPU scheduler into giving them more CPU
+       CPU scheduling security is important
+      ~Priority boost - After some time S, move all the jobs in the system to the topmost
+                        queue
+                        Hard to determine what S should be
+      ~Better Accounting - Rewrite rule 4. Once a job uses up its time allotment at a
+                           given level (regardless of how many times it has given up the
+                           CPU), its priority is reduced (i.e., it moves down one queue).
+      ~Ousterhoust's Law (Voodoo Constants) - Values (for things such as S ^^^) that seem to
+                                              work through black magic
+      ~Good idea to use small time slices for high priority and large for low
+       OpSys work gets highest priority
+       nice - lets you increase/decrease job priority
+      ~Incorporates new processes easily
+
+Proportional Share Scheduler
+================================================================================
+Fair-share scheduler
+Instead of optimizing for turnaround or response time, a scheduler might instead try to
+guarantee that each job obtain a certain percentage of CPU time.
+Lottery Scheduling: ~Every so often, hold a lottery to determine which process runs next
+                    ~Processes that should run more often should be given more chances to win the lottery
+                    ~Tickets - Used to represent the share of a resource that a process should receive
+                               The percent of tickets that a process has represents its share of the
+                               system resource in question
+                    ~Probabilistic not deterministic
+                    ~Ticket Currency - Allows a user with a set of tickets to allocate
+                                       tickets among their own jobs in whatever currency they
+                                       would like; the system then automatically converts said
+                                       currency into the correcy global value
+                                       see ostep example Lottery Scheduling 9: 9.2 Ticket Mechanisms
+                    ~Ticket Transfer - A process can temporarily hand off it tickets to another process
+                                       Client/Server Example
+                    ~Ticket Inflation - Process can raise or lower the number of tickets it owns
+                                        Only works in a trusting environment
+Stride Scheduling: ~A deterministic fair scheduler
+                   ~Each job has a stride which is inversely proportional to the tickets they have
+                    Stride - computed by dividing some large number by the number of tickets each
+                              process has been assigned
+                              Every time a process runs, we will increment a counter for it (pass value)
+                              by its stride to track its global progress
+                  ~Scheduler uses stride/pass to determine which process to
+                  ~Uses global state making it easy for new processes to monopolize CPU
+Linux Completely Fair Scheduler: ~CFS
+                                  Implements fair-share scheduling, but does so in a alternate
+                                  manner
+                                 ~
